@@ -1,0 +1,81 @@
+public class student {
+	int student_id;
+	String first_name;
+	String last_name; 
+	String date_of_birth; 
+	String email;
+	long phone_number;
+	
+	student(int id,String firstName, String lastName, String dob,String email, long phone)
+	{
+		student_id=id;
+		first_name=firstName;
+		last_name=lastName;
+		date_of_birth=dob;
+		this.email=email;
+		phone_number=phone;
+	}
+}
+
+public class course {
+	int course_id; 
+	String course_name; 
+	int credits; 
+	int teacher_id;
+	
+	course(int id,String name, int credits, int teach_id)
+	{
+		course_id=id;
+		course_name=name;
+		this.credits=credits;
+		teacher_id=teach_id;
+	}
+
+}
+
+public class enrollment {
+	int enrollment_id; 
+	int student_id; 
+	int course_id; 
+	String enrollment_date; 
+	
+	enrollment(int enrollment_id,int student_id, int course_id,	String enrollment_date)
+	{
+		this.enrollment_id=enrollment_id; 
+		this.student_id=student_id; 
+		this.course_id=course_id; 
+		this.enrollment_date=enrollment_date;
+	}
+}
+
+public class teacher {
+	int teacher_id;
+	String first_name;
+	String last_name ;
+	String email;
+	
+	teacher(int id,String fname,String lname,String email)
+	{
+		teacher_id=id;
+		first_name=fname;
+		last_name =lname;
+		this.email=email;
+	}
+
+}
+
+public class payment {
+	int payment_id; 
+	int student_id; 
+	int amount; 
+	String payment_date; 
+	
+	payment(int p_id,int s_id,int amount,String date)
+	{
+		payment_id=p_id; 
+		student_id=s_id; 
+		this.amount=amount; 
+		payment_date=date;
+	}
+
+}
