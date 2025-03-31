@@ -1,0 +1,192 @@
+import java.time.LocalDate;
+
+public class sis {
+	
+	void enrollStudentInCourse(student Student, course Course)
+	{
+		enrollment e = new enrollment(1,Student.student_id,Course.course_id,LocalDate.now());
+	}
+	void assignTeacherToCourse(teacher Teacher, course Course)
+	{
+		Course.teacher_id=Teacher.teacher_id;
+	}
+	void recordPayment(student Student, double amount, LocalDate date)
+	{
+		payment p = new payment(1,Student.student_id,amount,date);
+	}
+	void generateEnrollmentReport(course Course)
+	{
+		
+	}
+	void generatePaymentReport(student Student)
+	{
+		
+	}
+	void calculateCourseStatistics(course Course)
+	{
+		
+	}
+}
+
+
+
+public class course {
+	int course_id; 
+	String course_name; 
+	int credits; 
+	int teacher_id;
+	
+	course(int id,String name, int credits, int teach_id)
+	{
+		course_id=id;
+		course_name=name;
+		this.credits=credits;
+		teacher_id=teach_id;
+	}
+	
+	void AssignTeacher(teacher Teacher)
+	{
+		this.teacher_id=Teacher.teacher_id;
+	}
+	void UpdateCourseInfo(int id,String courseName,int cred, int t_id )
+	{
+		course_name=courseName;
+		credits=cred;
+		teacher_id=t_id;
+	}
+	void displayCourseInfo()
+	{
+		System.out.println("Course ID   : "+course_id);
+		System.out.println("Course Name : "+course_name);
+		System.out.println("Credits     : "+credits);
+		System.out.println("Teacher ID  : "+teacher_id);
+	}
+	void getEnrollments()
+	{
+		
+	}
+	int getTeacher()
+	{
+		return this.teacher_id;
+	}
+
+}
+
+
+public class enrollment {
+	int enrollment_id; 
+	int student_id; 
+	int course_id; 
+	LocalDate enrollment_date; 
+	
+	enrollment(int id, int student_id, int course_id,	LocalDate enrollment_date)
+	{
+		enrollment_id=id; 
+		this.student_id=student_id; 
+		this.course_id=course_id; 
+		this.enrollment_date=enrollment_date;
+	}
+	
+	int getStudent()
+	{
+		return this.student_id;
+	}
+	int getCourse()
+	{
+		return this.course_id;
+	}
+}
+
+
+
+public class teacher {
+	int teacher_id;
+	String first_name;
+	String last_name ;
+	String email;
+	
+	teacher(int id,String fname,String lname,String email)
+	{
+		teacher_id=id;
+		first_name=fname;
+		last_name =lname;
+		this.email=email;
+	}
+	
+	void UpdateTeacherInfo(int id,String firstName,String lastName, String email)
+	{
+		first_name=firstName;
+		last_name=lastName;
+		this.email=email;
+	}
+	void displayTeacherInfo()
+	{
+		System.out.println("Teacher ID : "+teacher_id);
+		System.out.println("First Name : "+first_name);
+		System.out.println("Last Name  : "+last_name);
+		System.out.println("Email ID   : "+email);
+	}
+	void getAssignedCourses()
+	{
+		
+	}public class payment {
+	int payment_id; 
+	int student_id; 
+	double amount; 
+	LocalDate payment_date; 
+	
+	payment(int id,int s_id,double amount,LocalDate date)
+	{
+		payment_id=id; 
+		student_id=s_id; 
+		this.amount=amount; 
+		payment_date=date;
+	}
+	int getStudent()
+	{
+		return this.student_id;
+	}
+	double getPaymentAmount()
+	{
+		return this.amount;
+	}
+	LocalDate getPaymentDate()
+	{
+		return this.payment_date;
+	}
+
+}
+
+
+public class sis {
+	
+	void enrollStudentInCourse(student Student, course Course)
+	{
+		enrollment e = new enrollment(1,Student.student_id,Course.course_id,LocalDate.now());
+	}
+	void assignTeacherToCourse(teacher Teacher, course Course)
+	{
+		Course.teacher_id=Teacher.teacher_id;
+	}
+	void recordPayment(student Student, double amount, LocalDate date)
+	{
+		payment p = new payment(1,Student.student_id,amount,date);
+	}
+	void generateEnrollmentReport(course Course)
+	{
+		
+	}
+	void generatePaymentReport(student Student)
+	{
+		
+	}
+	void calculateCourseStatistics(course Course)
+	{
+		
+	}
+}
+
+
+}
+
+
