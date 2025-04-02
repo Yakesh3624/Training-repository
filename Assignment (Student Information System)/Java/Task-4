@@ -1,0 +1,413 @@
+import java.time.LocalDate;
+import exception.*;
+public class student{
+	int student_id;
+	String first_name;
+	String last_name; 
+	LocalDate date_of_birth; 
+	String email;
+	String phone_number;
+	
+	student(int id,String firstName, String lastName, LocalDate dob,String email, String phone) throws InvalidStudentDataException
+	{
+		if(id<=0)
+		{
+			throw new InvalidStudentDataException("Student ID must be positive");
+		}
+		if(phone.length()!=10)
+		{
+			throw new InvalidStudentDataException("Invalid Phone number");
+		}
+		if(firstName.length()<3)
+		{
+			throw new InvalidStudentDataException("Invalid First name");
+		}
+		student_id=id;
+		first_name=firstName;
+		last_name=lastName;
+		date_of_birth=dob;
+		this.email=email;
+		phone_number=phone;
+			
+	}
+	
+	void enrollInCourse(course Course) throws InvalidEnrollmentDataException
+	{
+		enrollment e = new enrollment(1,this.student_id,Course.course_id,LocalDate.now());
+	
+	}
+	
+	void updateStudentInfo(int id,String firstName, String lastName, LocalDate dateOfBirth, String email, String phoneNumber) throws InvalidStudentDataException
+	{
+		if(phoneNumber.length()!=10)
+		{
+			throw new InvalidStudentDataException("Invalid Phone number");
+		}
+		if(firstName.length()<3)
+		{
+			throw new InvalidStudentDataException("Invalid First name");
+		}
+		first_name=firstName;
+		last_name=lastName;
+		date_of_birth=dateOfBirth;
+		this.email=email;
+		phone_number=phoneNumber;
+	}
+	
+	void makePayment(double amount) throws InsufficientFundsException, PaymentValidationException
+	{
+		payment p = new payment(1,this.student_id,amount,LocalDate.now());
+		
+	}
+	void displayStudentInfo()
+	{
+		System.out.println("Student ID    : "+student_id);
+		System.out.println("First Name    : "+first_name);
+		System.out.println("Last Name     : "+last_name);
+		System.out.println("Date of Birth : "+date_of_birth);
+		System.out.println("Email ID      : "+email);
+		System.out.println("Phone Number  : "+phone_number);
+	}
+	void getEnrolledCourses()
+	{
+		
+	}
+	void getPaymentHistory()
+	{
+		
+	}
+}
+
+
+
+import exception.*;
+public class course {
+	int course_id; 
+	String course_name; 
+	int credits; 
+	int teacher_id;
+	
+	course(int id,String name, int credits, int teach_id) throws InvalidCourseDataException
+	{
+		if(id<=0)
+		{
+			throw new InvalidCourseDataException("Invalid Course ID");
+		}
+		if(name.length()<3)
+		{
+			throw new InvalidCourseDataException("Invalid Course name");
+		}
+		if(credits <0)
+		{
+			throw new InvalidCourseDataException("Invalid Credits");
+		}
+		course_id=id;
+		course_name=name;
+		this.credits=credits;
+		teacher_id=teach_id;
+	}
+	
+	void AssignTeacher(teacher Teacher)
+	{
+		this.teacher_id=Teacher.teacher_id;
+	}
+	void UpdateCourseInfo(int id,String courseName,int cred, int t_id ) throws InvalidCourseDataException
+	{
+		if(id<=0)
+		{
+			throw new InvalidCourseDataException("Invalid Course ID");
+		}
+		if(courseName.length()<3)
+		{
+			throw new InvalidCourseDataException("Invalid Course name");
+		}
+		if(cred <0)
+		{
+			throw new InvalidCourseDataException("Invalid Credits");
+		}
+		course_name=courseName;
+		credits=cred;
+		teacher_id=t_id;
+	}
+	void displayCourseInfo()
+	{
+		System.out.println("Course ID   : "+course_id);
+		System.out.println("Course Name : "+course_name);
+		System.out.println("Credits     : "+credits);
+		System.out.println("Teacher ID  : "+teacher_id);
+	}
+	void getEnrollments()
+	{
+		
+	}
+	int getTeacher()
+	{
+		return this.teacher_id;
+	}
+
+}
+
+
+
+
+import java.time.LocalDate;
+
+import exception.*;
+
+public class enrollment {
+	int enrollment_id; 
+	int student_id; 
+	int course_id; 
+	LocalDate enrollment_date; 
+	
+	enrollment(int id, int student_id, int course_id,	LocalDate enrollment_date) throws InvalidEnrollmentDataException
+	{
+		if(id<=0)
+		{
+			throw new InvalidEnrollmentDataException("Invalid Enrollment ID");
+		}
+		if(student_id<=0)
+		{
+			throw new InvalidEnrollmentDataException("Invalid Student ID");
+		}
+		if(course_id<=0)
+		{
+			throw new InvalidEnrollmentDataException("Invalid Course ID");
+		}
+		enrollment_id=id; 
+		this.student_id=student_id; 
+		this.course_id=course_id; 
+		this.enrollment_date=enrollment_date;
+	}
+	
+	int getStudent()
+	{
+		return this.student_id;
+	}
+	int getCourse()
+	{
+		return this.course_id;
+	}
+}
+
+
+
+import exception.*;
+
+public class teacher {
+	int teacher_id;
+	String first_name;
+	String last_name ;
+	String email;
+	
+	teacher(int id,String fname,String lname,String email) throws InvalidTeacherDataException
+	{
+		if(id<=0)
+		{
+			throw new InvalidTeacherDataException("Invalid Enrollment ID");
+		}
+		if(fname.length()<3)
+		{
+			throw new InvalidTeacherDataException("Invalid Enrollment ID");
+		}
+		teacher_id=id;
+		first_name=fname;
+		last_name =lname;
+		this.email=email;
+	}
+	
+	void UpdateTeacherInfo(int id,String firstName,String lastName, String email) throws InvalidTeacherDataException
+	{
+		if(id<=0)
+		{
+			throw new InvalidTeacherDataException("Invalid Enrollment ID");
+		}
+		if(firstName.length()<3)
+		{
+			throw new InvalidTeacherDataException("Invalid Enrollment ID");
+		}
+		first_name=firstName;
+		last_name=lastName;
+		this.email=email;
+	}
+	void displayTeacherInfo()
+	{
+		System.out.println("Teacher ID : "+teacher_id);
+		System.out.println("First Name : "+first_name);
+		System.out.println("Last Name  : "+last_name);
+		System.out.println("Email ID   : "+email);
+	}
+	void getAssignedCourses()
+	{
+		
+	}
+
+}
+
+
+
+import java.time.LocalDate;
+import exception.*;
+
+public class payment {
+	int payment_id; 
+	int student_id; 
+	double amount; 
+	LocalDate payment_date; 
+	
+	payment(int id,int s_id,double amount,LocalDate date) throws InsufficientFundsException, PaymentValidationException
+	{
+		if(amount<=0)
+		{
+			throw new InsufficientFundsException();
+		}
+		if(id<=0)
+		{
+			throw new PaymentValidationException("Invalid Payment ID");
+		}
+		if(s_id<=0)
+		{
+			throw new PaymentValidationException("Invalid Student ID");
+		}
+		
+		payment_id=id; 
+		student_id=s_id; 
+		this.amount=amount; 
+		payment_date=date;
+	}
+	int getStudent()
+	{
+		return this.student_id;
+	}
+	double getPaymentAmount()
+	{
+		return this.amount;
+	}
+	LocalDate getPaymentDate()
+	{
+		return this.payment_date;
+	}
+
+}
+
+
+
+
+package exception;
+
+public class CourseNotFoundException extends Exception {
+
+	public CourseNotFoundException() {
+		super("Course not found");
+	}
+
+}
+
+
+
+package exception;
+
+public class DuplicateEnrollmentException extends Exception {
+
+	public DuplicateEnrollmentException() {
+		super("You have already enrolled in this Course");
+	}
+
+}
+
+
+
+package exception;
+
+public class InsufficientFundsException extends Exception{
+
+	public InsufficientFundsException() {
+		super("Insufficient amount");
+	}
+
+}
+
+
+
+package exception;
+
+public class InvalidCourseDataException extends Exception{
+
+	public InvalidCourseDataException(String m) {
+		super(m);
+	}
+
+}
+
+
+
+package exception;
+
+public class InvalidEnrollmentDataException extends Exception{
+
+	public InvalidEnrollmentDataException(String m) {
+		super(m);
+	}
+
+}
+
+
+
+package exception;
+
+public class InvalidStudentDataException extends Exception {
+
+	public InvalidStudentDataException(String m) {
+		super(m);
+	}
+
+}
+
+
+
+package exception;
+
+public class InvalidTeacherDataException extends Exception {
+
+	public InvalidTeacherDataException(String m) {
+		super(m);
+	}
+
+}
+
+
+
+package exception;
+
+public class PaymentValidationException extends Exception {
+
+	public PaymentValidationException(String m) {
+		super(m);
+	}
+
+
+}
+
+
+
+package exception;
+
+public class StudentNotFoundException extends Exception {
+
+	public StudentNotFoundException() {
+		super("Student information not found");
+	}
+
+}
+
+
+
+package exception;
+
+public class TeacherNotFoundException extends Exception {
+
+	public TeacherNotFoundException() {
+		super("Teacher not found");
+	}
+
+}
