@@ -1,0 +1,26 @@
+import java.time.LocalDate;
+
+public class Main {
+	
+	public static void main(String []args) throws Exception
+	{
+		
+		sis sis= new sis();
+		student s1 = new student(1,"John","Doe",LocalDate.of(1995, 8, 15),"john.doe@example.com","1234567890");
+		
+		course c1 = new course(100,"Introduction to Programming",3,0);
+		course c2 = new course(101,"Mathematics",4,0);
+		
+		s1.enrollInCourse(1,c1);
+		sis.enrollStudentInCourse(2,s1, c2);
+		
+		course c3 = new course(302,"Advanced Database Management",4,0);
+		teacher t1 = new teacher(1,"Sarah","Smith","sarah.smith@example.com");
+		c3.AssignTeacher(t1);
+		
+		sis.recordPayment(1, s1, 500, LocalDate.of(2003,4,10));
+		
+
+	}
+
+}
