@@ -1,0 +1,548 @@
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import exception.DuplicateEnrollmentException;
+import exception.InsufficientFundsException;
+import exception.InvalidStudentDataException;
+import exception.PaymentValidationException;
+
+public class student{
+	Connection con;
+	Statement sql; 
+	int student_id;
+	String first_name;
+	String last_name; 
+	LocalDate date_of_birth; 
+	String email;
+	String phone_number;
+	List<enrollment> enrolledCourses = new ArrayList<>(); 
+	List<payment>  payment = new ArrayList<>();
+	
+	student(int id,String firstName, String lastName, LocalDate dob,String email, String phone) throws Exception
+	{
+		if(id<=0)
+		{
+			throw new InvalidStudentDataException("Student ID must be positive");
+		}
+		if(phone.length()!=10)
+		{
+			throw new InvalidStudentDataException("Invalid Phone number");
+		}
+		if(firstName.length()<3)
+		{
+			throw new InvalidStudentDataException("Invalid First name");
+		}
+		student_id=id;
+		first_name=firstName;
+		last_name=lastName;
+		date_of_birth=dob;
+		this.email=email;
+		phone_number=phone;
+		FileInputStream fis = new FileInputStream("C:\\Users\\Yakesh\\eclipse-workspace\\Student Information System\\src\\sisdb.properties");
+		Properties prop = new Properties();
+		prop.load(fis);
+		con=DriverManager.getConnection(prop.getProperty("url"),prop.getProperty("username"),prop.getProperty("password"));
+		con.setAutoCommit(false);
+		sql=con.createStatement();
+		PreparedStatement s = con.prepareStatement("insert into students(student_id,first_name,last_name,date_of_birth,email,phone_number) values (?,?,?,?,?,?)");
+		s.setInt(1, id);
+		s.setString(2,first_name);
+		s.setString(3,last_name);
+		s.setDate(4,Date.valueOf(date_of_birth));
+		s.setString(5,email);
+		s.setString(6,phone_number);
+		s.executeUpdate();
+		con.commit();
+		
+	}
+	
+	void enrollInCourse(int id,course Course) throws Exception
+	{
+		for(enrollment e:enrolledCourses)
+		{
+			if(e.course_id==Course.course_id)
+			{
+				throw new DuplicateEnrollmentException();
+			}
+		}
+		enrollment e = new enrollment(id,this.student_id,Course.course_id,LocalDate.now());
+		e.student.add(this);
+		e.course.add(Course);
+		enrolledCourses.add(e);
+		Course.enrollments.add(e);
+		PreparedStatement s = con.prepareStatement("insert into enrollments(enrollment_id,student_id,course_id,enrollment_date) values(?,?,?,?);");
+		s.setInt(1,id);
+		s.setInt(2, this.student_id);
+		s.setInt(3, Course.course_id);
+		s.setDate(4, Date.valueOf(LocalDate.now()));
+		s.executeUpdate();
+		con.commit();
+		
+	
+	}
+	
+	void updateStudentInfo(int id,String firstName, String lastName, LocalDate dateOfBirth, String email, String phoneNumber) throws InvalidStudentDataException, SQLException
+	{
+		if(phoneNumber.length()!=10)
+		{
+			throw new InvalidStudentDataException("Invalid Phone number");
+		}
+		if(firstName.length()<3)
+		{
+			throw new InvalidStudentDataException("Invalid First name");
+		}
+		first_name=firstName;
+		last_name=lastName;
+		date_of_birth=dateOfBirth;
+		this.email=email;
+		phone_number=phoneNumber;
+		
+		PreparedStatement s = con.prepareStatement("update students set first_name=?,last_name=?,date_of_birth=?,emil=?,phone_number=? where student_id=?");
+		s.setString(1,first_name);
+		s.setString(2,last_name);
+		s.setDate(3,Date.valueOf(date_of_birth));
+		s.setString(4,email);
+		s.setString(5,phone_number);
+		s.setInt(6,id);
+		s.executeUpdate();
+		con.commit();
+	}
+	
+	void makePayment(int id,double amount) throws Exception
+	{
+		
+		payment p = new payment(id,this.student_id,amount,LocalDate.now());
+		p.payments.add(this);
+		payment.add(p);
+		PreparedStatement s = con.prepareStatement("insert into payments values(?,?,?,?)");
+		s.setInt(1,id);
+		s.setInt(2, student_id);
+		s.setDouble(3, amount);
+		s.setDate(4,Date.valueOf(LocalDate.now()));
+		s.executeUpdate();
+		con.commit();
+	}
+	void displayStudentInfo()
+	{
+		System.out.println("Student ID    : "+student_id);
+		System.out.println("First Name    : "+first_name);
+		System.out.println("Last Name     : "+last_name);
+		System.out.println("Date of Birth : "+date_of_birth);
+		System.out.println("Email ID      : "+email);
+		System.out.println("Phone Number  : "+phone_number);
+	}
+	List<enrollment> getEnrolledCourses()
+	{
+		return enrolledCourses;
+	}
+	List<payment> getPaymentHistory()
+	{
+		return payment;
+	}
+}
+
+
+
+
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+import exception.InvalidCourseDataException;
+public class course {
+	Connection con;
+	Statement sql; 
+	
+	int course_id; 
+	String course_name; 
+	int credits; 
+	int teacher_id;
+	List<enrollment> enrollments = new ArrayList<>();
+	List<teacher> teachers = new ArrayList<>();
+	
+	course(int id,String name, int credits, int teach_id) throws Exception
+	{
+		if(id<=0)
+		{
+			throw new InvalidCourseDataException("Invalid Course ID");
+		}
+		if(name.length()<3)
+		{
+			throw new InvalidCourseDataException("Invalid Course name");
+		}
+		if(credits <0)
+		{
+			throw new InvalidCourseDataException("Invalid Credits");
+		}
+		course_id=id;
+		course_name=name;
+		this.credits=credits;
+		teacher_id=teach_id;
+		FileInputStream fis = new FileInputStream("C:\\Users\\Yakesh\\eclipse-workspace\\Student Information System\\src\\sisdb.properties");
+		Properties prop = new Properties();
+		prop.load(fis);
+		con=DriverManager.getConnection(prop.getProperty("url"),prop.getProperty("username"),prop.getProperty("password"));
+		con.setAutoCommit(false);
+		sql=con.createStatement();
+		PreparedStatement s = con.prepareStatement("insert into courses(course_id,course_name,credits,teacher_id) values (?,?,?,?)");
+		s.setInt(1,id);
+		s.setString(2, course_name);
+		s.setInt(3, credits);
+		if(teacher_id==0)
+			s.setString(4, null);
+		else
+		s.setInt(4, teacher_id);
+		s.executeUpdate();
+		con.commit();
+		
+	}
+	
+	void AssignTeacher(teacher Teacher) throws Exception
+	{
+		this.teacher_id=Teacher.teacher_id;
+		teachers.add(Teacher);
+		Teacher.courses.add(this);
+		PreparedStatement s = con.prepareStatement("update courses set teacher_id=? where course_id=?");
+		s.setInt(1, this.teacher_id);
+		s.setInt(2, this.course_id);
+		s.executeUpdate();
+		con.commit();
+	}
+	void UpdateCourseInfo(int id,String courseName,int cred, int t_id ) throws Exception
+	{
+		if(id<=0)
+		{
+			throw new InvalidCourseDataException("Invalid Course ID");
+		}
+		if(courseName.length()<3)
+		{
+			throw new InvalidCourseDataException("Invalid Course name");
+		}
+		if(cred <0)
+		{
+			throw new InvalidCourseDataException("Invalid Credits");
+		}
+		course_name=courseName;
+		credits=cred;
+		teacher_id=t_id;
+		PreparedStatement s = con.prepareStatement("update courses set course_name=?, credits=?, teacher_id=? where course_id=?");
+		s.setString(1, course_name);
+		s.setInt(2, credits);
+		s.setInt(3, t_id);
+		s.setInt(4, id);
+		s.executeUpdate();
+		con.commit();
+	}
+	void displayCourseInfo()
+	{
+		System.out.println("Course ID   : "+course_id);
+		System.out.println("Course Name : "+course_name);
+		System.out.println("Credits     : "+credits);
+		System.out.println("Teacher ID  : "+teacher_id);
+	}
+	List<enrollment> getEnrollments()
+	{
+		return enrollments;
+	}
+	List<teacher> getTeacher()
+	{
+		return teachers;
+	}
+
+}
+
+
+
+
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+import exception.InvalidEnrollmentDataException;
+
+public class enrollment {
+	int enrollment_id; 
+	int student_id; 
+	int course_id; 
+	LocalDate enrollment_date; 
+	List<student> student = new ArrayList<>();
+	List<course> course = new ArrayList<>();
+	
+	enrollment(int id, int student_id, int course_id,	LocalDate enrollment_date) throws Exception
+	{
+		if(id<=0)
+		{
+			throw new InvalidEnrollmentDataException("Invalid Enrollment ID");
+		}
+		if(student_id<=0)
+		{
+			throw new InvalidEnrollmentDataException("Invalid Student ID");
+		}
+		if(course_id<=0)
+		{
+			throw new InvalidEnrollmentDataException("Invalid Course ID");
+		}
+		enrollment_id=id; 
+		this.student_id=student_id; 
+		this.course_id=course_id; 
+		this.enrollment_date=enrollment_date;
+		
+	}
+	
+	List<student> getStudent()
+	{
+		return student;
+	}
+	List<course> getCourse()
+	{
+		return course;
+	}
+}
+
+
+
+
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+import exception.InvalidTeacherDataException;
+
+public class teacher {
+	
+	Connection con;
+	Statement sql; 
+	
+	int teacher_id;
+	String first_name;
+	String last_name ;
+	String email;
+	List<course> courses = new ArrayList<>();
+	teacher(int id,String fname,String lname,String email) throws Exception
+	{
+		if(id<=0)
+		{
+			throw new InvalidTeacherDataException("Invalid Enrollment ID");
+		}
+		if(fname.length()<3)
+		{
+			throw new InvalidTeacherDataException("Invalid Enrollment ID");
+		}
+		teacher_id=id;
+		first_name=fname;
+		last_name =lname;
+		this.email=email;
+		FileInputStream fis = new FileInputStream("C:\\Users\\Yakesh\\eclipse-workspace\\Student Information System\\src\\sisdb.properties");
+		Properties prop = new Properties();
+		prop.load(fis);
+		con=DriverManager.getConnection(prop.getProperty("url"),prop.getProperty("username"),prop.getProperty("password"));
+		con.setAutoCommit(false);
+		sql=con.createStatement();
+		PreparedStatement s = con.prepareStatement("insert into teacher(teacher_id,first_name,last_name,email) values(?,?,?,?)");
+		s.setInt(1, id);
+		s.setString(2,first_name);
+		s.setString(3, last_name);
+		s.setString(4, email);
+		s.executeUpdate();
+		con.commit();
+	}
+	
+	void UpdateTeacherInfo(int id,String firstName,String lastName, String email) throws Exception
+	{
+		if(id<=0)
+		{
+			throw new InvalidTeacherDataException("Invalid Enrollment ID");
+		}
+		if(firstName.length()<3)
+		{
+			throw new InvalidTeacherDataException("Invalid Enrollment ID");
+		}
+		first_name=firstName;
+		last_name=lastName;
+		this.email=email;
+		PreparedStatement s = con.prepareStatement("update teacher set first_name=?,last_name=?,email=? where teacher_id=?");
+		s.setString(1,first_name);
+		s.setString(2, last_name);
+		s.setString(3, email);
+		s.setInt(4, id);
+		s.executeUpdate();
+		con.commit();
+		
+	}
+	void displayTeacherInfo()
+	{
+		System.out.println("Teacher ID : "+teacher_id);
+		System.out.println("First Name : "+first_name);
+		System.out.println("Last Name  : "+last_name);
+		System.out.println("Email ID   : "+email);
+	}
+	List<course> getAssignedCourses()
+	{
+		return courses;
+	}
+
+}
+
+
+
+
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+import exception.InsufficientFundsException;
+import exception.PaymentValidationException;
+
+public class payment {
+	
+	int payment_id; 
+	int student_id; 
+	double amount; 
+	LocalDate payment_date;
+	List<student> payments = new ArrayList<>();
+	
+	payment(int id,int s_id,double amount,LocalDate date) throws Exception
+	{
+		if(amount<=0)
+		{
+			throw new InsufficientFundsException();
+		}
+		if(id<=0)
+		{
+			throw new PaymentValidationException("Invalid Payment ID");
+		}
+		if(s_id<=0)
+		{
+			throw new PaymentValidationException("Invalid Student ID");
+		}
+		
+		payment_id=id; 
+		student_id=s_id; 
+		this.amount=amount; 
+		payment_date=date;
+		
+	}
+	List<student> getStudent()
+	{
+		return payments;
+	}
+	double getPaymentAmount()
+	{
+		return this.amount;
+	}
+	LocalDate getPaymentDate()
+	{
+		return this.payment_date;
+	}
+
+}
+
+
+
+
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+public class sis {
+	Connection con;
+	Statement sql;
+	sis() throws Exception
+	{
+		FileInputStream fis = new FileInputStream("C:\\Users\\Yakesh\\eclipse-workspace\\Student Information System\\src\\sisdb.properties");
+		Properties prop = new Properties();
+		prop.load(fis);
+		con=DriverManager.getConnection(prop.getProperty("url"),prop.getProperty("username"),prop.getProperty("password"));
+		sql=con.createStatement();
+		con.setAutoCommit(false);
+	}
+	List<course> availableCourse = new ArrayList<>();
+	List<student> availableStudent = new ArrayList<>();
+	List<teacher> availableTeacher = new ArrayList<>();
+	void enrollStudentInCourse(int id,student Student, course Course) throws Exception
+	{
+		Student.enrollInCourse(id,Course);	
+	}
+	void assignTeacherToCourse(teacher Teacher, course Course) throws Exception
+	{
+		Course.AssignTeacher(Teacher);
+		Teacher.courses.add(Course);
+	}
+	void recordPayment(int id,student Student, double amount, LocalDate date) throws Exception
+	{
+		payment p = new payment(id,Student.student_id,amount,date);
+		Student.payment.add(p);
+		p.payments.add(Student);
+		PreparedStatement s = con.prepareStatement("insert into payments(student_id,amount,payment_date) values(?,?,?)");
+		s.setInt(1, Student.student_id);
+		s.setDouble(2,amount);
+		s.setDate(3,Date.valueOf(date));
+		s.executeUpdate();
+		con.commit();
+		
+	}
+	List<enrollment> generateEnrollmentReport(course Course)
+	{
+		return Course.enrollments;
+	}
+	List<payment> generatePaymentReport(student Student)
+	{
+		return Student.payment;
+	}
+	void  calculateCourseStatistics(course Course)
+	{
+		System.out.println("Total enrollment : "+Course.enrollments.size());
+	}
+	List<enrollment> getEnrollmentsForStudent(student Student)
+	{
+		return Student.enrolledCourses;
+	}
+	List<course> GetCoursesForTeacher(teacher Teacher)
+	{
+		return Teacher.courses;
+	}
+}
+
+
+
+sisdb.properties
+
+driver=com.mysql.cj.jdbc.Driver
+url=jdbc:mysql://localhost:3306/sisdb
+username=root
+password=root
