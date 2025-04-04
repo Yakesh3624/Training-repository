@@ -1,0 +1,85 @@
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import exception.InsufficientFundsException;
+import exception.InvalidEnrollmentDataException;
+import exception.PaymentValidationException;
+
+public class sis {
+	
+	List<course> availableCourse = new ArrayList<>();
+	List<student> availableStudent = new ArrayList<>();
+	List<teacher> availableTeacher = new ArrayList<>();
+	void enrollStudentInCourse(student Student, course Course) throws InvalidEnrollmentDataException
+	{
+		enrollment e = new enrollment(1,Student.student_id,Course.course_id,LocalDate.now());
+		e.student.add(Student);
+		e.course.add(Course);
+	}
+	void assignTeacherToCourse(teacher Teacher, course Course)
+	{
+		Course.AssignTeacher(Teacher);
+		Teacher.courses.add(Course);
+	}
+	void recordPayment(student Student, double amount, LocalDate date) throws InsufficientFundsException, PaymentValidationException
+	{
+		payment p = new payment(1,Student.student_id,amount,date);
+		Student.payment.add(p);
+		p.payments.add(Student);
+	}
+	List<enrollment> generateEnrollmentReport(course Course)
+	{
+		return Course.enrollments;
+	}
+	List<payment> generatePaymentReport(student Student)
+	{
+		return Student.payment;
+	}
+	void  calculateCourseStatistics(course Course)
+	{
+		System.out.println("Total enrollment : "+Course.enrollments.size());
+	}
+	List<enrollment> getEnrollmentsForStudent(student Student)
+	{
+		return Student.enrolledCourses;
+	}
+	List<course> GetCoursesForTeacher(teacher Teacher)
+	{
+		return Teacher.courses;
+	}
+}
+
+
+
+
+import java.time.LocalDate;
+import java.util.Scanner;
+
+import exception.CourseNotFoundException;
+import exception.StudentNotFoundException;
+import exception.TeacherNotFoundException;
+
+public class Main {
+	
+	public static void main(String []args) throws Exception
+	{
+		
+		sis sis= new sis();
+        student s1 = new student(1, "John", "Doe", LocalDate.of(2000,05,15), "john.doe@example.com", "1234567890");
+        teacher t1 = new teacher(1, "Smith", "Johnson", "smith.johnson@example.com");
+        course c1 = new course(1, "Computer Science", 3,1);
+         
+        sis.availableStudent.add(s1);
+        sis.availableCourse.add(c1);
+        sis.availableTeacher.add(t1);
+        
+        sis.enrollStudentInCourse(s1, c1);
+        sis.assignTeacherToCourse(t1, c1);
+        sis.recordPayment(s1, 500,LocalDate.now());
+         
+        s1.displayStudentInfo();
+  }
+}
+
+
